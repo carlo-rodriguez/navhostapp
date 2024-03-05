@@ -1,5 +1,7 @@
 package de.example.navbugapp
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.Column
@@ -18,10 +20,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
+@SuppressLint("RestrictedApi", "StateFlowValueCalledInComposition")
 @Composable
 fun PrimaryView(primaryCoordinator: PrimaryCoordinator, mainCoordinator: MainCoordinator) {
     primaryCoordinator.navController = rememberNavController()
+
+    val arrayBefore = primaryCoordinator.navController.currentBackStack.value
+    Log.i("APP-NAV", "---- BEFORE ---- (size: ${arrayBefore.size})")
+    for (b in arrayBefore) {
+        Log.i("APP-NAV", b.toString())
+    }
     Scaffold(
         bottomBar = { BottomNav(primaryCoordinator.currentScreen.ordinal) { index -> primaryCoordinator.switchTab(index) } },
         modifier = Modifier.fillMaxSize(),
@@ -31,7 +39,17 @@ fun PrimaryView(primaryCoordinator: PrimaryCoordinator, mainCoordinator: MainCoo
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None },
             navController = primaryCoordinator.navController,
-            startDestination = primaryCoordinator.currentScreen.route
+            /* -- FIX --
+            * Do not change startDestination.
+            * If this changes:
+            * - the first time the parent navController (mainCoordinator) switches,
+            * every NavBackStackEntry of child navController (primaryCoordinator)
+            * that comes before the new startDestination will be removed (including Feed)
+            * - the second time the parent navController (mainCoordinator) switches,
+            * the startDestination wont be changed as it already is TEST.
+            * So the FEED NavBackStackEntry wont be removed
+             */
+            startDestination = BottomNavigationRoute.FEED.route
         ) {
             composable(BottomNavigationRoute.FEED.route) {
                 Feed()
