@@ -75,7 +75,7 @@ val navItemTexts = listOf(
 )
 
 enum class BottomNavigationRoute(val route: String) {
-    FEED("PRIMARY"),
+    FEED("FEED"),
     TEST("TEST"),
     PROFILE("PROFILE"),
 }
